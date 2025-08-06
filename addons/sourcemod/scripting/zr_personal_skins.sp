@@ -219,6 +219,24 @@ public Action Command_pSkin(int client, int args)
 	return Plugin_Handled;
 }
 
+stock void CheckPlayerSkinEndTime(int lefttime, char[] TimeLeft, int maxlength) {
+	if(lefttime > -1)
+	{
+		if(lefttime < 60) // 60 secs
+			FormatEx(TimeLeft, maxlength, "%02i %s", lefttime, "Seconds");
+		else if(lefttime > 3600 && lefttime <= 3660) // 1 Hour
+			FormatEx(TimeLeft, maxlength, "%i %s %02i %s", lefttime / 3600, "Hour", (lefttime / 60) % 60, "Minutes");
+		else if(lefttime > 3660 && lefttime < 86400) // 2 Hours or more
+			FormatEx(TimeLeft, maxlength, "%i %s %02i %s", lefttime / 3600, "Hours", (lefttime / 60) % 60, "Minutes");
+		else if(lefttime > 86400 && lefttime <= 172800) // 1 Day
+			FormatEx(TimeLeft, maxlength, "%i %s %02i %s", lefttime / 86400, "Day", (lefttime / 3600) % 24, "Hours");
+		else if(lefttime > 172800) // 2 Days or more
+			FormatEx(TimeLeft, maxlength, "%i %s %02i %s", lefttime / 86400, "Days", (lefttime / 3600) % 24, "Hours");
+		else // Less than 1 Hour
+			FormatEx(TimeLeft, maxlength, "%i %s %02i %s", lefttime / 60, "Minutes", lefttime % 60, "Seconds");
+	}
+}
+
 // We use this instead of PostAdminCheck, bcs ZombieReloaded check class on post.
 // Need to give the groups used as filter in playerclass before ZR check if user can access to it.
 public void OnClientPostAdminFilter(int client)
@@ -281,8 +299,6 @@ bool ValidatePersonalSkin(int client, const char[] modelKey, const char[] endKey
 		int endTime = g_hKV.GetNum(endKey, 0);
 		if(endTime != 0)
 		{
-			// for end time (useful if skin was rewarded during an event and there is an end for it)
-			// be careful with the date format otherwise the function will return an error
 			#if defined DEBUG
 			PrintToServer("[ZR-Personal Skins] End Time for %N: %d", client, endTime);
 			#endif
